@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "SQA Login API Test Collection — 2026",
+    "description": "Login системийн API туршилт\nISO/IEC 25010 | OWASP Top 10 | IEEE 829\nБиедаалтын зорилго: TC-01 ~ TC-05 API-аар шалгах",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:3000", "type": "string" },
+    { "key": "TOKEN",    "value": "",                      "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🟢 TC-01 — Зөв нэвтрэх (Valid Login)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// TC-01: Зөв нэвтрэлтийн шалгалт",
+              "pm.test('TC-01: Status 200 буцаах ёстой', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('TC-01: Token буцаах ёстой', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json).to.have.property('token');",
+              "    pm.collectionVariables.set('TOKEN', json.token);",
+              "});",
+              "",
+              "pm.test('TC-01: Success мессеж байх ёстой', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json.message).to.include('success');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{BASE_URL}}/api/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "🔴 TC-02 — Буруу нууц үг (Wrong Password)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// TC-02: Буруу нууц үгийн шалгалт",
+              "pm.test('TC-02: Status 401 буцаах ёстой', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "",
+              "pm.test('TC-02: Алдааны мессеж байх ёстой', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json).to.have.property('error');",
+              "    pm.expect(json.error).to.not.be.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{BASE_URL}}/api/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"wrongpassword\"\n}"
+        }
+      }
+    },
+    {
+      "name": "🚨 TC-04 — SQL Injection (BUG-001 шалгалт)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// TC-04: SQL Injection хамгаалалтын шалгалт",
+              "// OWASP Top 10:2021 — A03 Injection",
+              "pm.test('TC-04 BUG-001: SQL Injection блоклогдох ёстой (401 эсвэл 400)', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 401, 403]);",
+              "});",
+              "",
+              "pm.test('TC-04: Token буцаагаагүй байх ёстой', function () {",
+              "    const json = pm.response.json();",
+              "    pm.expect(json).to.not.have.property('token');",
+              "});",
+              "",
+              "// Хэрэв 200 буцаавал BUG байна",
+              "if (pm.response.code === 200) {",
+              "    console.error('🚨 BUG-001 CONFIRMED: SQL Injection амжилттай! Систем эмзэг байна!');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{BASE_URL}}/api/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"' OR '1'='1' --\",\n  \"password\": \"anything\"\n}"
+        }
+      }
+    },
+    {
+      "name": "🚨 TC-09 — XSS Register (BUG-002 шалгалт)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// TC-09: XSS хамгаалалтын шалгалт",
+              "// OWASP Top 10:2021 — A07 XSS",
+              "pm.test('TC-09 BUG-002: XSS оролт цэвэрлэгдсэн байх ёстой', function () {",
+              "    const responseText = pm.response.text();",
+              "    pm.expect(responseText).to.not.include('<script>');",
+              "    pm.expect(responseText).to.not.include('alert(');",
+              "});",
+              "",
+              "pm.test('TC-09: 400 эсвэл sanitize хариу буцаах ёстой', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{BASE_URL}}/api/register",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"<script>alert('XSS')</script>\",\n  \"email\": \"xss@test.com\",\n  \"password\": \"ValidPass1\"\n}"
+        }
+      }
+    },
+    {
+      "name": "🔒 Protected Endpoint — Token шалгалт",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Token-гүй хүсэлт 401 буцаах ёстой', function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{BASE_URL}}/api/dashboard",
+        "header": []
+      }
+    }
+  ]
+}

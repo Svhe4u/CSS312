@@ -1,0 +1,24 @@
+{
+  "name": "sqa-login-test-2026",
+  "version": "1.0.0",
+  "description": "Программ хангамжийн чанарын үнэлгээ — Login системийн туршилтын код (SQA Биедаалт 2026)",
+  "main": "index.js",
+  "scripts": {
+    "test:selenium": "node tests/selenium/login.test.js",
+    "test:jest": "jest tests/jest/ --coverage",
+    "test:all": "npm run test:jest && npm run test:selenium"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.18.1",
+    "sqlite3": "^5.1.7",
+    "express": "^4.18.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "author": "SQA Баг — 2026",
+  "license": "MIT"
+}
