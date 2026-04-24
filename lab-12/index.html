@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard - Lab 12-13</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #dde4ef;
+            --surface: #e8edf6;
+            --card: #eef2f9;
+            --shadow-out: 6px 6px 14px #b8c2d4, -6px -6px 14px #ffffff;
+            --shadow-in: inset 3px 3px 8px #b8c2d4, inset -3px -3px 8px #ffffff;
+            --orange: #f97316;
+            --text-primary: #1e2a3a;
+            --text-secondary: #6b7a8f;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .phone-container {
+            width: 300px;
+            background: var(--surface);
+            border-radius: 40px;
+            padding: 25px;
+            box-shadow: var(--shadow-out);
+        }
+
+        .header {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-out);
+            margin-bottom: 20px;
+        }
+
+        .category-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .amount {
+            font-family: 'Space Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .percent-tag {
+            display: inline-block;
+            margin-top: 10px;
+            background: var(--orange);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Loading төлөв */
+        .loading {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <div class="header">Statistic</div>
+
+        <div class="stat-card">
+            <div id="status" class="loading">Серверээс өгөгдөл татаж байна...</div>
+            <div class="category-name" id="cat-name">Restaurants</div>
+            <div class="amount" id="cat-amount">$ 0.00</div>
+            <div class="percent-tag" id="cat-percent">0%</div>
+        </div>
+
+        <p style="font-size: 10px; color: var(--text-secondary); text-align: center;">
+            Лаборатори 12-13: Node.js + PostgreSQL + CRUD
+        </p>
+    </div>
+
+    <script src="index.js"></script>
+    
+    <script>
+        // index.js доторх fetch амжилттай болсныг шалгах нэмэлт функц
+        window.addEventListener('load', () => {
+            console.log("HTML ачаалагдлаа. Одоо index.js-ийг ажиллуулж байна...");
+        });
+    </script>
+</body>
+</html>
