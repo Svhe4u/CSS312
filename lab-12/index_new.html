@@ -42,14 +42,16 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             overflow: hidden;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .phone-content {
-            width: 100%;
-            height: 100%;
+            flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
             position: relative;
+            padding-bottom: 80px;
         }
 
         .page {
@@ -80,6 +82,11 @@
             font-size: 24px;
             font-weight: 700;
             color: var(--text-primary);
+        }
+
+        .header-icon {
+            font-size: 24px;
+            cursor: pointer;
         }
 
         .search-bar {
@@ -126,6 +133,11 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 10px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
         }
 
         .product-name {
@@ -133,6 +145,9 @@
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .product-price {
@@ -147,8 +162,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100%;
             text-align: center;
+            padding-bottom: 100px;
         }
 
         .logo {
@@ -156,7 +171,7 @@
             height: 80px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 20px;
-            margin: 0 auto 30px;
+            margin: 30px auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -179,6 +194,7 @@
 
         .form-group {
             margin-bottom: 15px;
+            text-align: left;
         }
 
         .form-group label {
@@ -186,7 +202,6 @@
             font-size: 12px;
             color: var(--text-secondary);
             margin-bottom: 5px;
-            text-align: left;
         }
 
         .form-group input {
@@ -243,17 +258,23 @@
             font-weight: 600;
         }
 
+        .hidden-form {
+            display: none;
+        }
+
         /* PAGE 3: PAYMENT */
         .payment-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
+            padding-bottom: 100px;
         }
 
         .payment-title {
             font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
+            margin-bottom: 10px;
         }
 
         .card-display {
@@ -261,7 +282,6 @@
             color: white;
             padding: 25px;
             border-radius: 15px;
-            margin-bottom: 10px;
         }
 
         .card-label {
@@ -300,7 +320,6 @@
             background: var(--light-gray);
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 15px;
         }
 
         .summary-item {
@@ -330,21 +349,33 @@
         .status-message.success {
             background: #c8e6c9;
             color: #2e7d32;
-            display: block;
         }
 
         .status-message.error {
             background: #ffcdd2;
             color: #c62828;
+        }
+
+        .status-message.show {
             display: block;
         }
 
         /* NAVIGATION */
-        .nav-dots {
+        .nav-container {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .nav-dots {
             display: flex;
             gap: 8px;
         }
@@ -365,12 +396,8 @@
         }
 
         .nav-buttons {
-            position: absolute;
-            bottom: 40px;
-            width: calc(100% - 40px);
             display: flex;
             gap: 10px;
-            justify-content: center;
         }
 
         .nav-btn {
@@ -391,65 +418,171 @@
             background: var(--primary-blue);
             color: white;
         }
-            margin-bottom: 20px;
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        .category-name {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
+        /* SCROLLBAR STYLING */
+        .phone-content::-webkit-scrollbar {
+            width: 4px;
         }
 
-        .amount {
-            font-family: 'Space Mono', monospace;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .phone-content::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        .percent-tag {
-            display: inline-block;
-            margin-top: 10px;
-            background: var(--orange);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        /* Loading төлөв */
-        .loading {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-style: italic;
+        .phone-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
         }
     </style>
 </head>
 <body>
-
     <div class="phone-container">
-        <div class="header">Statistic</div>
+        <div class="phone-content">
+            <!-- PAGE 1: MARKETPLACE -->
+            <div class="page active" id="page-marketplace">
+                <div class="header">
+                    <div class="header-title">Featured</div>
+                    <div class="header-icon">🔔</div>
+                </div>
+                <input type="text" class="search-bar" placeholder="Search products...">
+                
+                <div class="section-title">Featured</div>
+                <div class="products-grid" id="featured-products">
+                    <!-- Loaded from API -->
+                </div>
 
-        <div class="stat-card">
-            <div id="status" class="loading">Серверээс өгөгдөл татаж байна...</div>
-            <div class="category-name" id="cat-name">Restaurants</div>
-            <div class="amount" id="cat-amount">$ 0.00</div>
-            <div class="percent-tag" id="cat-percent">0%</div>
+                <div class="section-title">Best Seller</div>
+                <div class="products-grid" id="bestseller-products">
+                    <!-- Loaded from API -->
+                </div>
+            </div>
+
+            <!-- PAGE 2: LOGIN -->
+            <div class="page" id="page-login">
+                <div class="login-container">
+                    <div class="logo">❤️</div>
+                    <h2 class="login-title">Company</h2>
+                    <p class="login-subtitle">Welcome to our store</p>
+
+                    <form id="login-form" style="width: 100%;">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </form>
+
+                    <form id="signup-form" style="width: 100%; display: none;">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </form>
+
+                    <div class="toggle-form">
+                        <span id="toggle-text">Don't have account? <a onclick="toggleAuthForm()">Sign Up</a></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: PAYMENT -->
+            <div class="page" id="page-payment">
+                <div class="payment-container">
+                    <h2 class="payment-title">Payment Details</h2>
+
+                    <div class="card-display">
+                        <div class="card-label">CARD NUMBER</div>
+                        <div class="card-number-display" id="card-display">•••• •••• •••• 1234</div>
+                        <div class="card-details">
+                            <div class="card-holder">
+                                <div style="font-size: 10px; opacity: 0.9;">CARD HOLDER</div>
+                                <div id="holder-display">John Doe</div>
+                            </div>
+                            <div class="card-expiry">
+                                <div style="font-size: 10px; opacity: 0.9;">EXPIRES</div>
+                                <div id="expiry-display">12/28</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 14px; font-weight: 600; margin-top: 20px;">Add Card Details</h3>
+                    <form id="payment-form">
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input type="text" id="card-number" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Card Holder</label>
+                            <input type="text" id="card-holder" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Expiry</label>
+                                <input type="text" id="card-expiry" placeholder="MM/YY" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="text" id="card-cvv" placeholder="123" required>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="order-summary">
+                        <div class="summary-item">
+                            <span>Subtotal</span>
+                            <span id="subtotal">$150.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Shipping</span>
+                            <span id="shipping">$10.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Tax</span>
+                            <span id="tax">$12.80</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span>Total</span>
+                            <span id="total">$172.80</span>
+                        </div>
+                    </div>
+
+                    <div id="status-message" class="status-message"></div>
+                    <button class="btn btn-primary" onclick="processPayment()">Complete Payment</button>
+                </div>
+            </div>
         </div>
 
-        <p style="font-size: 10px; color: var(--text-secondary); text-align: center;">
-            Лаборатори 12-13: Node.js + PostgreSQL + CRUD
-        </p>
+        <!-- NAVIGATION -->
+        <div class="nav-container">
+            <div class="nav-dots">
+                <div class="nav-dot active" onclick="goToPage(0)"></div>
+                <div class="nav-dot" onclick="goToPage(1)"></div>
+                <div class="nav-dot" onclick="goToPage(2)"></div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="prevPage()">←</button>
+                <button class="nav-btn" onclick="nextPage()">→</button>
+            </div>
+        </div>
     </div>
 
     <script src="index.js"></script>
-    
-    <script>
-        // index.js доторх fetch амжилттай болсныг шалгах нэмэлт функц
-        window.addEventListener('load', () => {
-            console.log("HTML ачаалагдлаа. Одоо index.js-ийг ажиллуулж байна...");
-        });
-    </script>
 </body>
 </html>

@@ -2,17 +2,9 @@
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-const express = require('express');
-const cors = require('cors'); // CORS санг дуудах
-const app = express();
-
-app.use(cors()); // Бүх гаднах холболтыг зөвшөөрөх
-app.use(express.json());
-
-// ... бусад кодууд
-
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -24,7 +16,52 @@ const pool = new Pool({
   port: 5433,
 });
 
-// CREATE TABLE
+// CREATE TABLES
+pool.query(`
+  CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(50),
+    price NUMERIC(10, 2),
+    image_url VARCHAR(255),
+    is_featured BOOLEAN DEFAULT false,
+    is_best_seller BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW()
+  )
+`, (err) => {
+  if (err) console.error('Products table creation error:', err);
+  else console.log('Products table ready.');
+});
+
+pool.query(`
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT NOW()
+  )
+`, (err) => {
+  if (err) console.error('Users table creation error:', err);
+  else console.log('Users table ready.');
+});
+
+pool.query(`
+  CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    card_number VARCHAR(20),
+    card_holder VARCHAR(100),
+    expiry VARCHAR(10),
+    amount NUMERIC(10, 2),
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT NOW()
+  )
+`, (err) => {
+  if (err) console.error('Orders table creation error:', err);
+  else console.log('Orders table ready.');
+});
+
 pool.query(`
   CREATE TABLE IF NOT EXISTS finance_records (
     id SERIAL PRIMARY KEY,
@@ -42,9 +79,112 @@ pool.query(`
   )
 `, (err) => {
   if (err) console.error('Table creation error:', err);
-  else console.log('Table ready.');
+  else console.log('Finance table ready.');
 });
 
+// ==================== PRODUCTS ENDPOINTS ====================
+// GET all products
+app.get('/api/products', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET featured products
+app.get('/api/products/featured', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM products WHERE is_featured = true LIMIT 4');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET best sellers
+app.get('/api/products/bestsellers', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM products WHERE is_best_seller = true LIMIT 4');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST new product
+app.post('/api/products', async (req, res) => {
+  const { name, category, price, image_url, is_featured, is_best_seller } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO products (name, category, price, image_url, is_featured, is_best_seller) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+      [name, category, price, image_url, is_featured || false, is_best_seller || false]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==================== USERS ENDPOINTS ====================
+// POST register user
+app.post('/api/users/register', async (req, res) => {
+  const { email, password, name } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO users (email, password, name) VALUES ($1,$2,$3) RETURNING id, email, name',
+      [email, password, name]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST login user
+app.post('/api/users/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await pool.query(
+      'SELECT id, email, name FROM users WHERE email=$1 AND password=$2',
+      [email, password]
+    );
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==================== ORDERS ENDPOINTS ====================
+// GET all orders
+app.get('/api/orders', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST new order
+app.post('/api/orders', async (req, res) => {
+  const { user_id, card_number, card_holder, expiry, amount } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO orders (user_id, card_number, card_holder, expiry, amount) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+      [user_id, card_number, card_holder, expiry, amount]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==================== FINANCE ENDPOINTS ====================
 // CREATE - POST /finance
 app.post('/finance', async (req, res) => {
   const {
@@ -69,7 +209,7 @@ app.post('/finance', async (req, res) => {
 // READ ALL - GET /finance
 app.get('/transactions', async (req, res) => {
     try {
-        const allEntries = await pool.query("SELECT * FROM transactions");
+        const allEntries = await pool.query("SELECT * FROM finance_records");
         res.json(allEntries.rows);
     } catch (err) {
         console.error(err.message);
